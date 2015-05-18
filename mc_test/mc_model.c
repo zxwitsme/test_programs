@@ -7,7 +7,6 @@ int cur_index = 0;
 int mc_index[16];
 int lookup_index[16];
 
-/*implement in governor*/
 int ap[4]={100, 200, 300, 500};
 int cp[4]={100, 200, 300, 500};
 //int ap[4]={200, 300, 400, 600};
@@ -28,7 +27,6 @@ int sum(int a, int b)
 	return (a+b)> max_freq ? max_freq: (a+b);
 }
 
-/*implement in governor*/
 void gen_lookup_sum()
 {
 	int i;
@@ -41,7 +39,6 @@ void gen_lookup_sum()
 	}
 }
 
-/*implement in governor*/
 void gen_lookup_higher()
 {
 	int i;
@@ -54,7 +51,6 @@ void gen_lookup_higher()
 	}
 }
 
-/*implement in governor*/
 void scan_copy()
 {
 	int hot_copy;
@@ -78,7 +74,6 @@ void change_copy(int copy_index, int freq)
 
 /*first find closest and less one*/
 /*then find closest and bigger one*/
-/*implement in governor*/
 int find_and_replace_s1(int new_freq)
 {
 	int i, k = -1, copy_min = 1000;
@@ -107,7 +102,6 @@ int find_and_replace_s1(int new_freq)
 
 /*first find closest and bigger one*/
 /*then find closest and less one*/
-/*implement in governor*/
 int find_and_replace_s2(int new_freq)
 {
 	int i, k = -1, copy_min = 1000;
@@ -136,7 +130,6 @@ int find_and_replace_s2(int new_freq)
 
 /*first find the closest and bigger*/
 /*then find the biggest*/
-/*implement in governor*/
 int find_copy_for_cp(int new_freq)
 {
 	int i, k = -1, max, freq_max=0, copy_min = 1000;
@@ -236,7 +229,7 @@ int main()
 		average_count++;
 		printf("%ld:average_freq=%ld\n", average_count, average*100/average_count);
 
-		sleep(1);
+		//sleep(1);
 
 		/*Generate a random number: bit 2 indicates request source*/
 		/*bit1-bit0 indicates the request index*/
