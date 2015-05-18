@@ -37,13 +37,6 @@ int main()
 		i++;
 	}
 
-	printf("\tMC_ASSIGN_CLK_LAYOUT(0, 0x490, 0xffffffff);\n");
-	printf("\tMC_ASSIGN_CLK_LAYOUT(1, 0x494, 0xffffffff);\n");
-	printf("\tMC_ASSIGN_CLK_LAYOUT(2, 0x498, 0xffffffff);\n");
-	printf("\tMC_ASSIGN_CLK_LAYOUT(3, 0x49c, 0xffffffff);\n");
-
-	printf("\n");
-
 	for (str1 = string; ;str1 = NULL) {
 		token = strtok_r(str1, "\n", &saveptr1);
 		if (token == NULL)
@@ -85,6 +78,14 @@ int main()
 	printf("j[1] = %d\n", j[0]);
 	printf("j[2] = %d\n", j[0]);
 	printf("j[3] = %d\n", j[0]);
+
+	printf("\tMC_ASSIGN_CLK_LAYOUT(0, 0x490, 0xffffffff);\n");
+	printf("\tMC_ASSIGN_CLK_LAYOUT(1, 0x494, 0xffffffff);\n");
+	printf("\tMC_ASSIGN_CLK_LAYOUT(2, 0x498, 0xffffffff);\n");
+	printf("\tMC_ASSIGN_CLK_LAYOUT(3, 0x49c, 0xffffffff);\n");
+
+	printf("\n");
+
 
 	for (i = 0, k = 0; i < j[0]; i++) {
 		str2 = strstr(f0_str[i], "ADDR");
@@ -184,18 +185,16 @@ int main()
 
 	k = 0;
 	printf("\tMC_ASSIGN_PHY_LAYOUT(%3d, ", k++);
-	printf("0x1700, 0xffffffff);\n");
+	printf("0x%03x, 0xffffffff);\n", phy_base + 455 * 4);
+	printf("\tMC_ASSIGN_PHY_LAYOUT(%3d, ", k++);
+	printf("0x%03x, 0xffffffff);\n", phy_base + 458 * 4);
+	printf("\tMC_ASSIGN_PHY_LAYOUT(%3d, ", k++);
+	printf("0x%03x, 0xffffffff);\n", phy_base + 459 * 4);
 	for (m = 0; m < 4; m++)
 	for (n = 29; n <=58; n++) {
 		printf("\tMC_ASSIGN_PHY_LAYOUT(%3d, ", k++);
 		printf("0x%03x, 0xffffffff);\n", phy_base + 4 * (m * 64 + n));
 	}
-	printf("\tMC_ASSIGN_PHY_LAYOUT(%3d, ", k++);
-	printf("0x%03x, 0xffffffff);\n", phy_base + 255 * 4);
-	printf("\tMC_ASSIGN_PHY_LAYOUT(%3d, ", k++);
-	printf("0x%03x, 0xffffffff);\n", phy_base + 258 * 4);
-	printf("\tMC_ASSIGN_PHY_LAYOUT(%3d, ", k++);
-	printf("0x%03x, 0xffffffff);\n", phy_base + 259 * 4);
 
 	return 0;
 }
