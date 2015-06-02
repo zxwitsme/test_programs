@@ -1,0 +1,1 @@
+cmd_/home/zhouxuewen/tools/git/driver_test/mod1.ko := ld -r -m elf_x86_64 -T /usr/src/linux-headers-3.13.0-49-generic/scripts/module-common.lds --build-id  -o /home/zhouxuewen/tools/git/driver_test/mod1.ko /home/zhouxuewen/tools/git/driver_test/mod1.o /home/zhouxuewen/tools/git/driver_test/mod1.mod.o
