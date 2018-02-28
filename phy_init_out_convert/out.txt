@@ -1,0 +1,1125 @@
+// ####################################################
+// 
+// Printing values in user input structure
+// 
+// ####################################################
+//##############################################################
+//
+// 4.3.1(A) Bring up VDD, VDDQ, and VAA 
+//
+// The power supplies can come up and stabilize in any order. 
+// While the power supplies are coming up, all outputs will be unknown and 
+// the values of the inputs are don't cares.
+//
+//############################################################## 
+//
+// 4.3.2(B) Start Clocks and Reset the PHY 
+//
+// The procedure to reset the PHY is as follows: 
+// 
+// 1. Drive PwrOkIn to 0. Note: Reset, DfiClk, and APBCLK can be X. 
+// 2. Start DfiClk and APBCLK 
+// 3. Drive Reset to 1. Note: The combination of PwrOkIn=0 and Reset=1 signals a cold reset to the PHY. 
+// 4. Wait a minimum of 8 cycles. 
+// 5. Drive PwrOkIn to 1. Once the PwrOkIn is asserted (and Reset is still asserted), 
+//    DfiClk synchronously switches to any legal input frequency. 
+// 6. Wait a minimum of 64 cycles. Note: This is the reset period for the PHY. 
+// 7. Drive Reset to 0. Note: All DFI and APB inputs must be driven at valid reset states before the deassertion of Reset. 
+// 8. The PHY is now in the reset state and is ready to accept APB transactions.
+//
+//##############################################################
+//##############################################################
+//
+// 4.3.3(C) Initialize PHY Configuration 
+//
+// Load the required PHY configuration registers for the appropriate mode and memory configuration
+//
+//##############################################################
+#define DDRPHY_200c5_VAL 0xa
+#define DDRPHY_1200c5_VAL 0xa
+#define DDRPHY_2200c5_VAL 0xa
+#define DDRPHY_3200c5_VAL 0xa
+//##############################################################
+//
+// Program ARdPtrInitVal based on Frequency and PLL Bypass inputs
+// The values programmed here assume ideal properties of DfiClk
+// and Pclk including:
+// - DfiClk skew
+// - DfiClk jitter
+// - DfiClk PVT variations
+// - Pclk skew
+// - Pclk jitter
+//
+// PLL Bypassed mode:
+//     For MemClk frequency > 933MHz, the valid range of ARdPtrInitVal_p0[3:0] is: 2-6
+//     For MemClk frequency < 933MHz, the valid range of ARdPtrInitVal_p0[3:0] is: 1-6
+//
+// PLL Enabled mode:
+//     For MemClk frequency > 933MHz, the valid range of ARdPtrInitVal_p0[3:0] is: 1-6
+//     For MemClk frequency < 933MHz, the valid range of ARdPtrInitVal_p0[3:0] is: 0-6
+//
+//##############################################################
+#define DDRPHY_2002e_VAL 0x2
+#define DDRPHY_12002e_VAL 0x2
+#define DDRPHY_22002e_VAL 0x2
+#define DDRPHY_32002e_VAL 0x2
+#define DDRPHY_20024_VAL 0xab
+#define DDRPHY_2003a_VAL 0x0
+#define DDRPHY_120024_VAL 0xab
+#define DDRPHY_2003a_VAL 0x0
+#define DDRPHY_220024_VAL 0xab
+#define DDRPHY_2003a_VAL 0x0
+#define DDRPHY_320024_VAL 0xab
+#define DDRPHY_2003a_VAL 0x0
+#define DDRPHY_20056_VAL 0x2
+#define DDRPHY_120056_VAL 0x2
+#define DDRPHY_220056_VAL 0x2
+#define DDRPHY_320056_VAL 0x2
+#define DDRPHY_1004d_VAL 0x600
+#define DDRPHY_1014d_VAL 0x600
+#define DDRPHY_1104d_VAL 0x600
+#define DDRPHY_1114d_VAL 0x600
+#define DDRPHY_11004d_VAL 0x600
+#define DDRPHY_11014d_VAL 0x600
+#define DDRPHY_11104d_VAL 0x600
+#define DDRPHY_11114d_VAL 0x600
+#define DDRPHY_21004d_VAL 0x600
+#define DDRPHY_21014d_VAL 0x600
+#define DDRPHY_21104d_VAL 0x600
+#define DDRPHY_21114d_VAL 0x600
+#define DDRPHY_31004d_VAL 0x600
+#define DDRPHY_31014d_VAL 0x600
+#define DDRPHY_31104d_VAL 0x600
+#define DDRPHY_31114d_VAL 0x600
+#define DDRPHY_10049_VAL 0x618
+#define DDRPHY_10149_VAL 0x618
+#define DDRPHY_11049_VAL 0x618
+#define DDRPHY_11149_VAL 0x618
+#define DDRPHY_110049_VAL 0x618
+#define DDRPHY_110149_VAL 0x618
+#define DDRPHY_111049_VAL 0x618
+#define DDRPHY_111149_VAL 0x618
+#define DDRPHY_210049_VAL 0x618
+#define DDRPHY_210149_VAL 0x618
+#define DDRPHY_211049_VAL 0x618
+#define DDRPHY_211149_VAL 0x618
+#define DDRPHY_310049_VAL 0x618
+#define DDRPHY_310149_VAL 0x618
+#define DDRPHY_311049_VAL 0x618
+#define DDRPHY_311149_VAL 0x618
+#define DDRPHY_20018_VAL 0x5
+#define DDRPHY_20075_VAL 0x4
+#define DDRPHY_20050_VAL 0x0
+#define DDRPHY_20008_VAL 0x215
+#define DDRPHY_120008_VAL 0x215
+#define DDRPHY_220008_VAL 0x215
+#define DDRPHY_320008_VAL 0x215
+#define DDRPHY_20088_VAL 0x29
+#define DDRPHY_2007c_VAL 0xa2
+#define DDRPHY_12007c_VAL 0xa2
+#define DDRPHY_22007c_VAL 0xa2
+#define DDRPHY_32007c_VAL 0xa2
+#define DDRPHY_200b2_VAL 0x204
+#define DDRPHY_10043_VAL 0x5a1
+#define DDRPHY_10143_VAL 0x5a1
+#define DDRPHY_11043_VAL 0x5a1
+#define DDRPHY_11143_VAL 0x5a1
+#define DDRPHY_1200b2_VAL 0x204
+#define DDRPHY_110043_VAL 0x5a1
+#define DDRPHY_110143_VAL 0x5a1
+#define DDRPHY_111043_VAL 0x5a1
+#define DDRPHY_111143_VAL 0x5a1
+#define DDRPHY_2200b2_VAL 0x204
+#define DDRPHY_210043_VAL 0x5a1
+#define DDRPHY_210143_VAL 0x5a1
+#define DDRPHY_211043_VAL 0x5a1
+#define DDRPHY_211143_VAL 0x5a1
+#define DDRPHY_3200b2_VAL 0x204
+#define DDRPHY_310043_VAL 0x5a1
+#define DDRPHY_310143_VAL 0x5a1
+#define DDRPHY_311043_VAL 0x5a1
+#define DDRPHY_311143_VAL 0x5a1
+#define DDRPHY_200fa_VAL 0x1
+#define DDRPHY_1200fa_VAL 0x1
+#define DDRPHY_2200fa_VAL 0x1
+#define DDRPHY_3200fa_VAL 0x1
+#define DDRPHY_20019_VAL 0x1
+#define DDRPHY_120019_VAL 0x1
+#define DDRPHY_220019_VAL 0x1
+#define DDRPHY_320019_VAL 0x1
+#define DDRPHY_200f0_VAL 0x0
+#define DDRPHY_200f1_VAL 0x0
+#define DDRPHY_200f2_VAL 0x4444
+#define DDRPHY_200f3_VAL 0x0
+#define DDRPHY_200f4_VAL 0x5555
+#define DDRPHY_200f5_VAL 0x0
+#define DDRPHY_200f6_VAL 0x0
+#define DDRPHY_200f7_VAL 0xf000
+#define DDRPHY_2000b_VAL 0x42
+#define DDRPHY_2000c_VAL 0x85
+#define DDRPHY_2000d_VAL 0x534
+#define DDRPHY_2000e_VAL 0x2c
+#define DDRPHY_12000b_VAL 0x42
+#define DDRPHY_12000c_VAL 0x85
+#define DDRPHY_12000d_VAL 0x534
+#define DDRPHY_12000e_VAL 0x2c
+#define DDRPHY_22000b_VAL 0x42
+#define DDRPHY_22000c_VAL 0x85
+#define DDRPHY_22000d_VAL 0x534
+#define DDRPHY_22000e_VAL 0x2c
+#define DDRPHY_32000b_VAL 0x42
+#define DDRPHY_32000c_VAL 0x85
+#define DDRPHY_32000d_VAL 0x534
+#define DDRPHY_32000e_VAL 0x2c
+#define DDRPHY_20025_VAL 0x0
+#define DDRPHY_2002d_VAL 0x1
+#define DDRPHY_12002d_VAL 0x1
+#define DDRPHY_22002d_VAL 0x1
+#define DDRPHY_32002d_VAL 0x1
+//##############################################################
+//
+// 4.3.4(D) Load the 1D IMEM image
+// 
+// The procedure is as follow:
+// 
+// 1.	Load the microcontroller memory with the provided training firmware 
+// 2.	Initialize the firmware mailbox structures to be able to communicate with the firmware (see "3.4.1 Mailbox facility for firmware" in the "DesignWare Cores DDR PHY Training Application Note") 
+// 
+//##############################################################
+#define DDRPHY_50000_VAL 0xa8
+//##############################################################
+//
+// [phyinit_sequence] Steps D to H for 1D Training of Pstate 0
+//
+//##############################################################
+//##############################################################
+//
+// 4.3.5(E) Set the PHY input clocks to the desired frequency 533 
+// 
+// Set the PHY input clocks to the desired operating frequency. Before proceeding to the next step, 
+// the clock should be stable at the new frequency. For more information on clocking requirements, see "Clocks" on page <XXX>.
+// 
+//##############################################################
+//##############################################################
+//
+// 4.3.5(F) Load the 1D DMEM image and write the 1D Message Block parameters for the training firmware 
+// 
+// The procedure is as follows: 
+// 
+//##############################################################
+// 1.    Enable access to the internal CSRs by setting the MicroContMuxSel CSR to 0. 
+//       This allows the memory controller unrestricted access to the configuration CSRs. 
+#define DDRPHY_d0000_VAL 0x0
+// 2.	Load the firmware DMEM segment to initialize the data structures.
+// 3.	Write the Firmware Message Block with the required contents detailing the training parameters.
+#define DDRPHY_54000_VAL 0x600
+#define DDRPHY_54001_VAL 0x0
+#define DDRPHY_54002_VAL 0x0
+#define DDRPHY_54003_VAL 0x854
+#define DDRPHY_54004_VAL 0x1
+#define DDRPHY_54005_VAL 0x3c3c
+#define DDRPHY_54006_VAL 0x40
+#define DDRPHY_54007_VAL 0x0
+#define DDRPHY_54008_VAL 0x7
+#define DDRPHY_54009_VAL 0xff
+#define DDRPHY_5400a_VAL 0x0
+#define DDRPHY_5400b_VAL 0x1
+#define DDRPHY_5400c_VAL 0x1
+#define DDRPHY_5400d_VAL 0x0
+#define DDRPHY_5400e_VAL 0x0
+#define DDRPHY_5400f_VAL 0x0
+#define DDRPHY_54010_VAL 0x0
+#define DDRPHY_54011_VAL 0x0
+#define DDRPHY_54012_VAL 0x310
+#define DDRPHY_54013_VAL 0x0
+#define DDRPHY_54014_VAL 0x0
+#define DDRPHY_54015_VAL 0x0
+#define DDRPHY_54016_VAL 0x0
+#define DDRPHY_54017_VAL 0x0
+#define DDRPHY_54018_VAL 0x0
+#define DDRPHY_54019_VAL 0x1b34
+#define DDRPHY_5401a_VAL 0xc1
+#define DDRPHY_5401b_VAL 0x4d44
+#define DDRPHY_5401c_VAL 0x4d00
+#define DDRPHY_5401d_VAL 0x0
+#define DDRPHY_5401e_VAL 0x0
+#define DDRPHY_5401f_VAL 0x1b34
+#define DDRPHY_54020_VAL 0xc1
+#define DDRPHY_54021_VAL 0x4d44
+#define DDRPHY_54022_VAL 0x4d00
+// 4.    Isolate the APB access from the internal CSRs by setting the MicroContMuxSel CSR to 1. 
+//      This allows the firmware unrestricted access to the configuration CSRs. 
+#define DDRPHY_d0000_VAL 0x1
+//##############################################################
+//
+// 4.3.7(G) Execute the Training Firmware 
+// 
+// The training firmware is executed with the following procedure: 
+//
+//##############################################################
+// 1.  Reset the firmware microcontroller by writing the MicroReset CSR to set the StallToMicro and 
+//     ResetToMicro fields to 1 (all other fields should be zero). 
+//     Then rewrite the CSR so that only the StallToMicro remains set (all other fields should be zero). 
+#define DDRPHY_d0000_VAL 0x1
+#define DDRPHY_d0099_VAL 0x9
+#define DDRPHY_d0099_VAL 0x1
+// 2. Begin execution of the training firmware by setting the MicroReset CSR to 4'b0000. 
+#define DDRPHY_d0099_VAL 0x0
+// 3.   Wait for the training firmware to complete by following the procedure in "uCtrl Initialization and Mailbox Messaging" 
+//##############################################################
+//
+// 4.3.8(H) Read the Message Block results
+// 
+// The procedure is as follows:
+// 
+//##############################################################
+// 1.	Enable access to the internal CSRs by setting the MicroContMuxSel CSR to 0.
+#define DDRPHY_d0000_VAL 0x0
+// 2.	Read the Firmware Message Block to obtain the results from the training 
+// 3.	Isolate the APB access from the internal CSRs by setting the MicroContMuxSel CSR to 1. 
+#define DDRPHY_d0000_VAL 0x1
+// 4.	If training is required at another frequency, repeat the operations starting at step (E). 
+//##############################################################
+//
+// [phyinit_sequence] Steps D to H for 1D Training of Pstate 1
+//
+//##############################################################
+//##############################################################
+//
+// 4.3.5(E) Set the PHY input clocks to the desired frequency 533 
+// 
+// Set the PHY input clocks to the desired operating frequency. Before proceeding to the next step, 
+// the clock should be stable at the new frequency. For more information on clocking requirements, see "Clocks" on page <XXX>.
+// 
+//##############################################################
+//##############################################################
+//
+// 4.3.5(F) Load the 1D DMEM image and write the 1D Message Block parameters for the training firmware 
+// 
+// The procedure is as follows: 
+// 
+//##############################################################
+// 1.    Enable access to the internal CSRs by setting the MicroContMuxSel CSR to 0. 
+//       This allows the memory controller unrestricted access to the configuration CSRs. 
+#define DDRPHY_d0000_VAL 0x0
+// 2.	Load the firmware DMEM segment to initialize the data structures.
+// 3.	Write the Firmware Message Block with the required contents detailing the training parameters.
+#define DDRPHY_54000_VAL 0x0
+#define DDRPHY_54001_VAL 0x0
+#define DDRPHY_54002_VAL 0x1
+#define DDRPHY_54003_VAL 0x854
+#define DDRPHY_54004_VAL 0x1
+#define DDRPHY_54005_VAL 0x3c3c
+#define DDRPHY_54006_VAL 0x0
+#define DDRPHY_54007_VAL 0x0
+#define DDRPHY_54008_VAL 0x0
+#define DDRPHY_54009_VAL 0x0
+#define DDRPHY_5400a_VAL 0x0
+#define DDRPHY_5400b_VAL 0x0
+#define DDRPHY_5400c_VAL 0x0
+#define DDRPHY_5400d_VAL 0x0
+#define DDRPHY_5400e_VAL 0x0
+#define DDRPHY_5400f_VAL 0x0
+#define DDRPHY_54010_VAL 0x0
+#define DDRPHY_54011_VAL 0x0
+#define DDRPHY_54012_VAL 0x0
+#define DDRPHY_54013_VAL 0x0
+#define DDRPHY_54014_VAL 0x0
+#define DDRPHY_54015_VAL 0x0
+#define DDRPHY_54016_VAL 0x0
+#define DDRPHY_54017_VAL 0x0
+#define DDRPHY_54018_VAL 0x0
+#define DDRPHY_54019_VAL 0x0
+#define DDRPHY_5401a_VAL 0x0
+#define DDRPHY_5401b_VAL 0x0
+#define DDRPHY_5401c_VAL 0x0
+#define DDRPHY_5401d_VAL 0x0
+#define DDRPHY_5401e_VAL 0x0
+#define DDRPHY_5401f_VAL 0x0
+#define DDRPHY_54020_VAL 0x0
+#define DDRPHY_54021_VAL 0x0
+#define DDRPHY_54022_VAL 0x0
+// 4.    Isolate the APB access from the internal CSRs by setting the MicroContMuxSel CSR to 1. 
+//      This allows the firmware unrestricted access to the configuration CSRs. 
+#define DDRPHY_d0000_VAL 0x1
+//##############################################################
+//
+// 4.3.7(G) Execute the Training Firmware 
+// 
+// The training firmware is executed with the following procedure: 
+//
+//##############################################################
+// 1.  Reset the firmware microcontroller by writing the MicroReset CSR to set the StallToMicro and 
+//     ResetToMicro fields to 1 (all other fields should be zero). 
+//     Then rewrite the CSR so that only the StallToMicro remains set (all other fields should be zero). 
+#define DDRPHY_d0000_VAL 0x1
+#define DDRPHY_d0099_VAL 0x9
+#define DDRPHY_d0099_VAL 0x1
+// 2. Begin execution of the training firmware by setting the MicroReset CSR to 4'b0000. 
+#define DDRPHY_d0099_VAL 0x0
+// 3.   Wait for the training firmware to complete by following the procedure in "uCtrl Initialization and Mailbox Messaging" 
+//##############################################################
+//
+// 4.3.8(H) Read the Message Block results
+// 
+// The procedure is as follows:
+// 
+//##############################################################
+// 1.	Enable access to the internal CSRs by setting the MicroContMuxSel CSR to 0.
+#define DDRPHY_d0000_VAL 0x0
+// 2.	Read the Firmware Message Block to obtain the results from the training 
+// 3.	Isolate the APB access from the internal CSRs by setting the MicroContMuxSel CSR to 1. 
+#define DDRPHY_d0000_VAL 0x1
+// 4.	If training is required at another frequency, repeat the operations starting at step (E). 
+//##############################################################
+//
+// [phyinit_sequence] Steps D to H for 1D Training of Pstate 2
+//
+//##############################################################
+//##############################################################
+//
+// 4.3.5(E) Set the PHY input clocks to the desired frequency 533 
+// 
+// Set the PHY input clocks to the desired operating frequency. Before proceeding to the next step, 
+// the clock should be stable at the new frequency. For more information on clocking requirements, see "Clocks" on page <XXX>.
+// 
+//##############################################################
+//##############################################################
+//
+// 4.3.5(F) Load the 1D DMEM image and write the 1D Message Block parameters for the training firmware 
+// 
+// The procedure is as follows: 
+// 
+//##############################################################
+// 1.    Enable access to the internal CSRs by setting the MicroContMuxSel CSR to 0. 
+//       This allows the memory controller unrestricted access to the configuration CSRs. 
+#define DDRPHY_d0000_VAL 0x0
+// 2.	Load the firmware DMEM segment to initialize the data structures.
+// 3.	Write the Firmware Message Block with the required contents detailing the training parameters.
+#define DDRPHY_54000_VAL 0x0
+#define DDRPHY_54001_VAL 0x0
+#define DDRPHY_54002_VAL 0x2
+#define DDRPHY_54003_VAL 0x854
+#define DDRPHY_54004_VAL 0x1
+#define DDRPHY_54005_VAL 0x3c3c
+#define DDRPHY_54006_VAL 0x0
+#define DDRPHY_54007_VAL 0x0
+#define DDRPHY_54008_VAL 0x0
+#define DDRPHY_54009_VAL 0x0
+#define DDRPHY_5400a_VAL 0x0
+#define DDRPHY_5400b_VAL 0x0
+#define DDRPHY_5400c_VAL 0x0
+#define DDRPHY_5400d_VAL 0x0
+#define DDRPHY_5400e_VAL 0x0
+#define DDRPHY_5400f_VAL 0x0
+#define DDRPHY_54010_VAL 0x0
+#define DDRPHY_54011_VAL 0x0
+#define DDRPHY_54012_VAL 0x0
+#define DDRPHY_54013_VAL 0x0
+#define DDRPHY_54014_VAL 0x0
+#define DDRPHY_54015_VAL 0x0
+#define DDRPHY_54016_VAL 0x0
+#define DDRPHY_54017_VAL 0x0
+#define DDRPHY_54018_VAL 0x0
+#define DDRPHY_54019_VAL 0x0
+#define DDRPHY_5401a_VAL 0x0
+#define DDRPHY_5401b_VAL 0x0
+#define DDRPHY_5401c_VAL 0x0
+#define DDRPHY_5401d_VAL 0x0
+#define DDRPHY_5401e_VAL 0x0
+#define DDRPHY_5401f_VAL 0x0
+#define DDRPHY_54020_VAL 0x0
+#define DDRPHY_54021_VAL 0x0
+#define DDRPHY_54022_VAL 0x0
+// 4.    Isolate the APB access from the internal CSRs by setting the MicroContMuxSel CSR to 1. 
+//      This allows the firmware unrestricted access to the configuration CSRs. 
+#define DDRPHY_d0000_VAL 0x1
+//##############################################################
+//
+// 4.3.7(G) Execute the Training Firmware 
+// 
+// The training firmware is executed with the following procedure: 
+//
+//##############################################################
+// 1.  Reset the firmware microcontroller by writing the MicroReset CSR to set the StallToMicro and 
+//     ResetToMicro fields to 1 (all other fields should be zero). 
+//     Then rewrite the CSR so that only the StallToMicro remains set (all other fields should be zero). 
+#define DDRPHY_d0000_VAL 0x1
+#define DDRPHY_d0099_VAL 0x9
+#define DDRPHY_d0099_VAL 0x1
+// 2. Begin execution of the training firmware by setting the MicroReset CSR to 4'b0000. 
+#define DDRPHY_d0099_VAL 0x0
+// 3.   Wait for the training firmware to complete by following the procedure in "uCtrl Initialization and Mailbox Messaging" 
+//##############################################################
+//
+// 4.3.8(H) Read the Message Block results
+// 
+// The procedure is as follows:
+// 
+//##############################################################
+// 1.	Enable access to the internal CSRs by setting the MicroContMuxSel CSR to 0.
+#define DDRPHY_d0000_VAL 0x0
+// 2.	Read the Firmware Message Block to obtain the results from the training 
+// 3.	Isolate the APB access from the internal CSRs by setting the MicroContMuxSel CSR to 1. 
+#define DDRPHY_d0000_VAL 0x1
+// 4.	If training is required at another frequency, repeat the operations starting at step (E). 
+//##############################################################
+//
+// [phyinit_sequence] Steps D to H for 1D Training of Pstate 3
+//
+//##############################################################
+//##############################################################
+//
+// 4.3.5(E) Set the PHY input clocks to the desired frequency 533 
+// 
+// Set the PHY input clocks to the desired operating frequency. Before proceeding to the next step, 
+// the clock should be stable at the new frequency. For more information on clocking requirements, see "Clocks" on page <XXX>.
+// 
+//##############################################################
+//##############################################################
+//
+// 4.3.5(F) Load the 1D DMEM image and write the 1D Message Block parameters for the training firmware 
+// 
+// The procedure is as follows: 
+// 
+//##############################################################
+// 1.    Enable access to the internal CSRs by setting the MicroContMuxSel CSR to 0. 
+//       This allows the memory controller unrestricted access to the configuration CSRs. 
+#define DDRPHY_d0000_VAL 0x0
+// 2.	Load the firmware DMEM segment to initialize the data structures.
+// 3.	Write the Firmware Message Block with the required contents detailing the training parameters.
+#define DDRPHY_54000_VAL 0x0
+#define DDRPHY_54001_VAL 0x0
+#define DDRPHY_54002_VAL 0x3
+#define DDRPHY_54003_VAL 0x854
+#define DDRPHY_54004_VAL 0x1
+#define DDRPHY_54005_VAL 0x3c3c
+#define DDRPHY_54006_VAL 0x0
+#define DDRPHY_54007_VAL 0x0
+#define DDRPHY_54008_VAL 0x0
+#define DDRPHY_54009_VAL 0x0
+#define DDRPHY_5400a_VAL 0x0
+#define DDRPHY_5400b_VAL 0x0
+#define DDRPHY_5400c_VAL 0x0
+#define DDRPHY_5400d_VAL 0x0
+#define DDRPHY_5400e_VAL 0x0
+#define DDRPHY_5400f_VAL 0x0
+#define DDRPHY_54010_VAL 0x0
+#define DDRPHY_54011_VAL 0x0
+#define DDRPHY_54012_VAL 0x0
+#define DDRPHY_54013_VAL 0x0
+#define DDRPHY_54014_VAL 0x0
+#define DDRPHY_54015_VAL 0x0
+#define DDRPHY_54016_VAL 0x0
+#define DDRPHY_54017_VAL 0x0
+#define DDRPHY_54018_VAL 0x0
+#define DDRPHY_54019_VAL 0x0
+#define DDRPHY_5401a_VAL 0x0
+#define DDRPHY_5401b_VAL 0x0
+#define DDRPHY_5401c_VAL 0x0
+#define DDRPHY_5401d_VAL 0x0
+#define DDRPHY_5401e_VAL 0x0
+#define DDRPHY_5401f_VAL 0x0
+#define DDRPHY_54020_VAL 0x0
+#define DDRPHY_54021_VAL 0x0
+#define DDRPHY_54022_VAL 0x0
+// 4.    Isolate the APB access from the internal CSRs by setting the MicroContMuxSel CSR to 1. 
+//      This allows the firmware unrestricted access to the configuration CSRs. 
+#define DDRPHY_d0000_VAL 0x1
+//##############################################################
+//
+// 4.3.7(G) Execute the Training Firmware 
+// 
+// The training firmware is executed with the following procedure: 
+//
+//##############################################################
+// 1.  Reset the firmware microcontroller by writing the MicroReset CSR to set the StallToMicro and 
+//     ResetToMicro fields to 1 (all other fields should be zero). 
+//     Then rewrite the CSR so that only the StallToMicro remains set (all other fields should be zero). 
+#define DDRPHY_d0000_VAL 0x1
+#define DDRPHY_d0099_VAL 0x9
+#define DDRPHY_d0099_VAL 0x1
+// 2. Begin execution of the training firmware by setting the MicroReset CSR to 4'b0000. 
+#define DDRPHY_d0099_VAL 0x0
+// 3.   Wait for the training firmware to complete by following the procedure in "uCtrl Initialization and Mailbox Messaging" 
+//##############################################################
+//
+// 4.3.8(H) Read the Message Block results
+// 
+// The procedure is as follows:
+// 
+//##############################################################
+// 1.	Enable access to the internal CSRs by setting the MicroContMuxSel CSR to 0.
+#define DDRPHY_d0000_VAL 0x0
+// 2.	Read the Firmware Message Block to obtain the results from the training 
+// 3.	Isolate the APB access from the internal CSRs by setting the MicroContMuxSel CSR to 1. 
+#define DDRPHY_d0000_VAL 0x1
+// 4.	If training is required at another frequency, repeat the operations starting at step (E). 
+//##############################################################
+//
+// 4.3.9(I) Load PHY Init Engine Image 
+// 
+// Load the PHY Initialization Engine memory with the provided initialization sequence.
+// 
+// <Note: For LPDDR3/LPDDR4, this sequence will include the necessary retraining code.>
+// 
+//##############################################################
+// Enable access to the internal CSRs by setting the MicroContMuxSel CSR to 0. 
+// This allows the memory controller unrestricted access to the configuration CSRs. 
+#define DDRPHY_d0000_VAL 0x0
+#define DDRPHY_90000_VAL 0x0
+#define DDRPHY_90001_VAL 0x0
+#define DDRPHY_90002_VAL 0x8
+#define DDRPHY_90003_VAL 0x0
+#define DDRPHY_90004_VAL 0x0
+#define DDRPHY_90005_VAL 0x8
+#define DDRPHY_90029_VAL 0x0
+#define DDRPHY_9002a_VAL 0x45a
+#define DDRPHY_9002b_VAL 0x19
+#define DDRPHY_9002c_VAL 0x8
+#define DDRPHY_9002d_VAL 0x478
+#define DDRPHY_9002e_VAL 0x119
+#define DDRPHY_9002f_VAL 0xb
+#define DDRPHY_90030_VAL 0x480
+#define DDRPHY_90031_VAL 0x119
+#define DDRPHY_90032_VAL 0x8
+#define DDRPHY_90033_VAL 0x448
+#define DDRPHY_90034_VAL 0x139
+#define DDRPHY_90035_VAL 0x0
+#define DDRPHY_90036_VAL 0xe8
+#define DDRPHY_90037_VAL 0x109
+#define DDRPHY_90038_VAL 0x2
+#define DDRPHY_90039_VAL 0x10
+#define DDRPHY_9003a_VAL 0x139
+#define DDRPHY_9003b_VAL 0xf
+#define DDRPHY_9003c_VAL 0x7c0
+#define DDRPHY_9003d_VAL 0x139
+#define DDRPHY_9003e_VAL 0x44
+#define DDRPHY_9003f_VAL 0x630
+#define DDRPHY_90040_VAL 0x159
+#define DDRPHY_90041_VAL 0x14f
+#define DDRPHY_90042_VAL 0x630
+#define DDRPHY_90043_VAL 0x159
+#define DDRPHY_90044_VAL 0x47
+#define DDRPHY_90045_VAL 0x630
+#define DDRPHY_90046_VAL 0x149
+#define DDRPHY_90047_VAL 0x4f
+#define DDRPHY_90048_VAL 0x630
+#define DDRPHY_90049_VAL 0x179
+#define DDRPHY_9004a_VAL 0x8
+#define DDRPHY_9004b_VAL 0xe0
+#define DDRPHY_9004c_VAL 0x109
+#define DDRPHY_9004d_VAL 0x0
+#define DDRPHY_9004e_VAL 0x7c8
+#define DDRPHY_9004f_VAL 0x109
+#define DDRPHY_90050_VAL 0x0
+#define DDRPHY_90051_VAL 0x1
+#define DDRPHY_90052_VAL 0x8
+#define DDRPHY_90053_VAL 0x0
+#define DDRPHY_90054_VAL 0x45a
+#define DDRPHY_90055_VAL 0x39
+#define DDRPHY_90056_VAL 0x0
+#define DDRPHY_90057_VAL 0x448
+#define DDRPHY_90058_VAL 0x109
+#define DDRPHY_90059_VAL 0x41
+#define DDRPHY_9005a_VAL 0x630
+#define DDRPHY_9005b_VAL 0x179
+#define DDRPHY_9005c_VAL 0x1
+#define DDRPHY_9005d_VAL 0x618
+#define DDRPHY_9005e_VAL 0x119
+#define DDRPHY_9005f_VAL 0x40c0
+#define DDRPHY_90060_VAL 0x630
+#define DDRPHY_90061_VAL 0x149
+#define DDRPHY_90062_VAL 0x8
+#define DDRPHY_90063_VAL 0x4
+#define DDRPHY_90064_VAL 0x48
+#define DDRPHY_90065_VAL 0x4040
+#define DDRPHY_90066_VAL 0x630
+#define DDRPHY_90067_VAL 0x149
+#define DDRPHY_90068_VAL 0x0
+#define DDRPHY_90069_VAL 0x4
+#define DDRPHY_9006a_VAL 0x48
+#define DDRPHY_9006b_VAL 0x40
+#define DDRPHY_9006c_VAL 0x630
+#define DDRPHY_9006d_VAL 0x149
+#define DDRPHY_9006e_VAL 0x10
+#define DDRPHY_9006f_VAL 0x4
+#define DDRPHY_90070_VAL 0x18
+#define DDRPHY_90071_VAL 0x0
+#define DDRPHY_90072_VAL 0x4
+#define DDRPHY_90073_VAL 0x78
+#define DDRPHY_90074_VAL 0x549
+#define DDRPHY_90075_VAL 0x630
+#define DDRPHY_90076_VAL 0x159
+#define DDRPHY_90077_VAL 0xd49
+#define DDRPHY_90078_VAL 0x630
+#define DDRPHY_90079_VAL 0x159
+#define DDRPHY_9007a_VAL 0x94c
+#define DDRPHY_9007b_VAL 0x630
+#define DDRPHY_9007c_VAL 0x159
+#define DDRPHY_9007d_VAL 0x94c
+#define DDRPHY_9007e_VAL 0x630
+#define DDRPHY_9007f_VAL 0x159
+#define DDRPHY_90080_VAL 0x442
+#define DDRPHY_90081_VAL 0x630
+#define DDRPHY_90082_VAL 0x149
+#define DDRPHY_90083_VAL 0x42
+#define DDRPHY_90084_VAL 0x630
+#define DDRPHY_90085_VAL 0x149
+#define DDRPHY_90086_VAL 0x1
+#define DDRPHY_90087_VAL 0x630
+#define DDRPHY_90088_VAL 0x149
+#define DDRPHY_90089_VAL 0x0
+#define DDRPHY_9008a_VAL 0xe0
+#define DDRPHY_9008b_VAL 0x109
+#define DDRPHY_9008c_VAL 0xa
+#define DDRPHY_9008d_VAL 0x10
+#define DDRPHY_9008e_VAL 0x109
+#define DDRPHY_9008f_VAL 0x9
+#define DDRPHY_90090_VAL 0x3c0
+#define DDRPHY_90091_VAL 0x149
+#define DDRPHY_90092_VAL 0x9
+#define DDRPHY_90093_VAL 0x3c0
+#define DDRPHY_90094_VAL 0x159
+#define DDRPHY_90095_VAL 0x18
+#define DDRPHY_90096_VAL 0x10
+#define DDRPHY_90097_VAL 0x109
+#define DDRPHY_90098_VAL 0x0
+#define DDRPHY_90099_VAL 0x3c0
+#define DDRPHY_9009a_VAL 0x109
+#define DDRPHY_9009b_VAL 0x18
+#define DDRPHY_9009c_VAL 0x4
+#define DDRPHY_9009d_VAL 0x8
+#define DDRPHY_9009e_VAL 0xc
+#define DDRPHY_9009f_VAL 0x10
+#define DDRPHY_900a0_VAL 0x109
+#define DDRPHY_900a1_VAL 0x3
+#define DDRPHY_900a2_VAL 0x10
+#define DDRPHY_900a3_VAL 0x109
+#define DDRPHY_900a4_VAL 0x7
+#define DDRPHY_900a5_VAL 0x7c0
+#define DDRPHY_900a6_VAL 0x109
+#define DDRPHY_900a7_VAL 0x10
+#define DDRPHY_900a8_VAL 0x10
+#define DDRPHY_900a9_VAL 0x109
+#define DDRPHY_40000_VAL 0x811
+#define DDRPHY_40020_VAL 0x880
+#define DDRPHY_40040_VAL 0x0
+#define DDRPHY_40060_VAL 0x0
+#define DDRPHY_40001_VAL 0x4016
+#define DDRPHY_40021_VAL 0x83
+#define DDRPHY_40041_VAL 0x4f
+#define DDRPHY_40061_VAL 0x0
+#define DDRPHY_40002_VAL 0x4040
+#define DDRPHY_40022_VAL 0x83
+#define DDRPHY_40042_VAL 0x51
+#define DDRPHY_40062_VAL 0x0
+#define DDRPHY_40003_VAL 0x811
+#define DDRPHY_40023_VAL 0x880
+#define DDRPHY_40043_VAL 0x0
+#define DDRPHY_40063_VAL 0x0
+#define DDRPHY_40004_VAL 0x71e
+#define DDRPHY_40024_VAL 0xf
+#define DDRPHY_40044_VAL 0x1740
+#define DDRPHY_40064_VAL 0x0
+#define DDRPHY_40005_VAL 0x16
+#define DDRPHY_40025_VAL 0x8f
+#define DDRPHY_40045_VAL 0x4b
+#define DDRPHY_40065_VAL 0x0
+#define DDRPHY_40006_VAL 0x716
+#define DDRPHY_40026_VAL 0xf
+#define DDRPHY_40046_VAL 0x2001
+#define DDRPHY_40066_VAL 0x0
+#define DDRPHY_40007_VAL 0x716
+#define DDRPHY_40027_VAL 0xf
+#define DDRPHY_40047_VAL 0x2800
+#define DDRPHY_40067_VAL 0x0
+#define DDRPHY_40008_VAL 0x716
+#define DDRPHY_40028_VAL 0xf
+#define DDRPHY_40048_VAL 0xf00
+#define DDRPHY_40068_VAL 0x0
+#define DDRPHY_40009_VAL 0x71e
+#define DDRPHY_40029_VAL 0xf
+#define DDRPHY_40049_VAL 0x1400
+#define DDRPHY_40069_VAL 0x0
+#define DDRPHY_4000a_VAL 0xe08
+#define DDRPHY_4002a_VAL 0xc15
+#define DDRPHY_4004a_VAL 0x0
+#define DDRPHY_4006a_VAL 0x0
+#define DDRPHY_4000b_VAL 0x623
+#define DDRPHY_4002b_VAL 0x15
+#define DDRPHY_4004b_VAL 0x0
+#define DDRPHY_4006b_VAL 0x0
+#define DDRPHY_4000c_VAL 0x4040
+#define DDRPHY_4002c_VAL 0x80
+#define DDRPHY_4004c_VAL 0x0
+#define DDRPHY_4006c_VAL 0x0
+#define DDRPHY_4000d_VAL 0xe08
+#define DDRPHY_4002d_VAL 0xc1a
+#define DDRPHY_4004d_VAL 0x0
+#define DDRPHY_4006d_VAL 0x0
+#define DDRPHY_4000e_VAL 0x623
+#define DDRPHY_4002e_VAL 0x1a
+#define DDRPHY_4004e_VAL 0x0
+#define DDRPHY_4006e_VAL 0x0
+#define DDRPHY_4000f_VAL 0x4040
+#define DDRPHY_4002f_VAL 0x80
+#define DDRPHY_4004f_VAL 0x0
+#define DDRPHY_4006f_VAL 0x0
+#define DDRPHY_40010_VAL 0x808
+#define DDRPHY_40030_VAL 0xc05
+#define DDRPHY_40050_VAL 0x43
+#define DDRPHY_40070_VAL 0x2000
+#define DDRPHY_40011_VAL 0x8
+#define DDRPHY_40031_VAL 0x5
+#define DDRPHY_40051_VAL 0x43
+#define DDRPHY_40071_VAL 0x2000
+#define DDRPHY_40012_VAL 0x840
+#define DDRPHY_40032_VAL 0xc05
+#define DDRPHY_40052_VAL 0x43
+#define DDRPHY_40072_VAL 0x2000
+#define DDRPHY_40013_VAL 0x808
+#define DDRPHY_40033_VAL 0xc0a
+#define DDRPHY_40053_VAL 0x43
+#define DDRPHY_40073_VAL 0x2000
+#define DDRPHY_40014_VAL 0x8
+#define DDRPHY_40034_VAL 0xa
+#define DDRPHY_40054_VAL 0x43
+#define DDRPHY_40074_VAL 0x2000
+#define DDRPHY_40015_VAL 0x840
+#define DDRPHY_40035_VAL 0xc0a
+#define DDRPHY_40055_VAL 0x43
+#define DDRPHY_40075_VAL 0x2000
+#define DDRPHY_40016_VAL 0x4040
+#define DDRPHY_40036_VAL 0x80
+#define DDRPHY_40056_VAL 0x0
+#define DDRPHY_40076_VAL 0x0
+#define DDRPHY_40017_VAL 0x60a
+#define DDRPHY_40037_VAL 0x15
+#define DDRPHY_40057_VAL 0x1200
+#define DDRPHY_40077_VAL 0x0
+#define DDRPHY_40018_VAL 0x61a
+#define DDRPHY_40038_VAL 0x15
+#define DDRPHY_40058_VAL 0x1300
+#define DDRPHY_40078_VAL 0x0
+#define DDRPHY_40019_VAL 0x60a
+#define DDRPHY_40039_VAL 0x1a
+#define DDRPHY_40059_VAL 0x1200
+#define DDRPHY_40079_VAL 0x0
+#define DDRPHY_4001a_VAL 0x65a
+#define DDRPHY_4003a_VAL 0x1a
+#define DDRPHY_4005a_VAL 0x1300
+#define DDRPHY_4007a_VAL 0x0
+#define DDRPHY_4001b_VAL 0x4808
+#define DDRPHY_4003b_VAL 0x880
+#define DDRPHY_4005b_VAL 0x0
+#define DDRPHY_4007b_VAL 0x0
+#define DDRPHY_900aa_VAL 0x8
+#define DDRPHY_900ab_VAL 0x7aa
+#define DDRPHY_900ac_VAL 0x2a
+#define DDRPHY_900ad_VAL 0x10
+#define DDRPHY_900ae_VAL 0x7b2
+#define DDRPHY_900af_VAL 0x2a
+#define DDRPHY_900b0_VAL 0x10
+#define DDRPHY_900b1_VAL 0x400
+#define DDRPHY_900b2_VAL 0x10e
+#define DDRPHY_900b3_VAL 0x10
+#define DDRPHY_900b4_VAL 0x2a8
+#define DDRPHY_900b5_VAL 0x129
+#define DDRPHY_900b6_VAL 0x8
+#define DDRPHY_900b7_VAL 0x370
+#define DDRPHY_900b8_VAL 0x129
+#define DDRPHY_900b9_VAL 0xa
+#define DDRPHY_900ba_VAL 0x3c8
+#define DDRPHY_900bb_VAL 0x1a9
+#define DDRPHY_900bc_VAL 0x4
+#define DDRPHY_900bd_VAL 0x790
+#define DDRPHY_900be_VAL 0x11a
+#define DDRPHY_900bf_VAL 0xc
+#define DDRPHY_900c0_VAL 0x408
+#define DDRPHY_900c1_VAL 0x119
+#define DDRPHY_900c2_VAL 0x4
+#define DDRPHY_900c3_VAL 0x0
+#define DDRPHY_900c4_VAL 0x18
+#define DDRPHY_900c5_VAL 0x0
+#define DDRPHY_900c6_VAL 0x408
+#define DDRPHY_900c7_VAL 0x119
+#define DDRPHY_900c8_VAL 0x14
+#define DDRPHY_900c9_VAL 0x790
+#define DDRPHY_900ca_VAL 0x11a
+#define DDRPHY_900cb_VAL 0x8
+#define DDRPHY_900cc_VAL 0x4
+#define DDRPHY_900cd_VAL 0x18
+#define DDRPHY_900ce_VAL 0xc
+#define DDRPHY_900cf_VAL 0x408
+#define DDRPHY_900d0_VAL 0x119
+#define DDRPHY_900d1_VAL 0x7
+#define DDRPHY_900d2_VAL 0x0
+#define DDRPHY_900d3_VAL 0x18
+#define DDRPHY_900d4_VAL 0x0
+#define DDRPHY_900d5_VAL 0x408
+#define DDRPHY_900d6_VAL 0x119
+#define DDRPHY_900d7_VAL 0x8
+#define DDRPHY_900d8_VAL 0x8568
+#define DDRPHY_900d9_VAL 0x108
+#define DDRPHY_900da_VAL 0x18
+#define DDRPHY_900db_VAL 0x790
+#define DDRPHY_900dc_VAL 0x16a
+#define DDRPHY_900dd_VAL 0x8
+#define DDRPHY_900de_VAL 0x1d8
+#define DDRPHY_900df_VAL 0x169
+#define DDRPHY_900e0_VAL 0x10
+#define DDRPHY_900e1_VAL 0x8558
+#define DDRPHY_900e2_VAL 0x168
+#define DDRPHY_900e3_VAL 0x70
+#define DDRPHY_900e4_VAL 0x788
+#define DDRPHY_900e5_VAL 0x16a
+#define DDRPHY_900e6_VAL 0x1ff8
+#define DDRPHY_900e7_VAL 0x85a8
+#define DDRPHY_900e8_VAL 0x1e8
+#define DDRPHY_900e9_VAL 0x50
+#define DDRPHY_900ea_VAL 0x798
+#define DDRPHY_900eb_VAL 0x16a
+#define DDRPHY_900ec_VAL 0x60
+#define DDRPHY_900ed_VAL 0x7a0
+#define DDRPHY_900ee_VAL 0x16a
+#define DDRPHY_900ef_VAL 0x8
+#define DDRPHY_900f0_VAL 0x8310
+#define DDRPHY_900f1_VAL 0x168
+#define DDRPHY_900f2_VAL 0x8
+#define DDRPHY_900f3_VAL 0xa310
+#define DDRPHY_900f4_VAL 0x168
+#define DDRPHY_900f5_VAL 0xa
+#define DDRPHY_900f6_VAL 0x408
+#define DDRPHY_900f7_VAL 0x169
+#define DDRPHY_900f8_VAL 0x6e
+#define DDRPHY_900f9_VAL 0x0
+#define DDRPHY_900fa_VAL 0x68
+#define DDRPHY_900fb_VAL 0x0
+#define DDRPHY_900fc_VAL 0x408
+#define DDRPHY_900fd_VAL 0x169
+#define DDRPHY_900fe_VAL 0x0
+#define DDRPHY_900ff_VAL 0x8310
+#define DDRPHY_90100_VAL 0x168
+#define DDRPHY_90101_VAL 0x0
+#define DDRPHY_90102_VAL 0xa310
+#define DDRPHY_90103_VAL 0x168
+#define DDRPHY_90104_VAL 0x1ff8
+#define DDRPHY_90105_VAL 0x85a8
+#define DDRPHY_90106_VAL 0x1e8
+#define DDRPHY_90107_VAL 0x68
+#define DDRPHY_90108_VAL 0x798
+#define DDRPHY_90109_VAL 0x16a
+#define DDRPHY_9010a_VAL 0x78
+#define DDRPHY_9010b_VAL 0x7a0
+#define DDRPHY_9010c_VAL 0x16a
+#define DDRPHY_9010d_VAL 0x68
+#define DDRPHY_9010e_VAL 0x790
+#define DDRPHY_9010f_VAL 0x16a
+#define DDRPHY_90110_VAL 0x8
+#define DDRPHY_90111_VAL 0x8b10
+#define DDRPHY_90112_VAL 0x168
+#define DDRPHY_90113_VAL 0x8
+#define DDRPHY_90114_VAL 0xab10
+#define DDRPHY_90115_VAL 0x168
+#define DDRPHY_90116_VAL 0xa
+#define DDRPHY_90117_VAL 0x408
+#define DDRPHY_90118_VAL 0x169
+#define DDRPHY_90119_VAL 0x5b
+#define DDRPHY_9011a_VAL 0x0
+#define DDRPHY_9011b_VAL 0x68
+#define DDRPHY_9011c_VAL 0x0
+#define DDRPHY_9011d_VAL 0x408
+#define DDRPHY_9011e_VAL 0x169
+#define DDRPHY_9011f_VAL 0x0
+#define DDRPHY_90120_VAL 0x8b10
+#define DDRPHY_90121_VAL 0x168
+#define DDRPHY_90122_VAL 0x0
+#define DDRPHY_90123_VAL 0xab10
+#define DDRPHY_90124_VAL 0x168
+#define DDRPHY_90125_VAL 0x0
+#define DDRPHY_90126_VAL 0x1d8
+#define DDRPHY_90127_VAL 0x169
+#define DDRPHY_90128_VAL 0xa
+#define DDRPHY_90129_VAL 0x0
+#define DDRPHY_9012a_VAL 0x1e9
+#define DDRPHY_9012b_VAL 0x8
+#define DDRPHY_9012c_VAL 0x8080
+#define DDRPHY_9012d_VAL 0x108
+#define DDRPHY_9012e_VAL 0x84
+#define DDRPHY_9012f_VAL 0x790
+#define DDRPHY_90130_VAL 0x16a
+#define DDRPHY_90131_VAL 0xc
+#define DDRPHY_90132_VAL 0x408
+#define DDRPHY_90133_VAL 0x169
+#define DDRPHY_90134_VAL 0x1c
+#define DDRPHY_90135_VAL 0x0
+#define DDRPHY_90136_VAL 0x68
+#define DDRPHY_90137_VAL 0x2
+#define DDRPHY_90138_VAL 0x408
+#define DDRPHY_90139_VAL 0x169
+#define DDRPHY_9013a_VAL 0x0
+#define DDRPHY_9013b_VAL 0x8080
+#define DDRPHY_9013c_VAL 0x108
+#define DDRPHY_9013d_VAL 0x8
+#define DDRPHY_9013e_VAL 0x7aa
+#define DDRPHY_9013f_VAL 0x6a
+#define DDRPHY_90140_VAL 0x0
+#define DDRPHY_90141_VAL 0x8568
+#define DDRPHY_90142_VAL 0x108
+#define DDRPHY_90143_VAL 0xa
+#define DDRPHY_90144_VAL 0x0
+#define DDRPHY_90145_VAL 0x1a9
+#define DDRPHY_90146_VAL 0x9
+#define DDRPHY_90147_VAL 0x0
+#define DDRPHY_90148_VAL 0x68
+#define DDRPHY_90149_VAL 0x8
+#define DDRPHY_9014a_VAL 0x8558
+#define DDRPHY_9014b_VAL 0x168
+#define DDRPHY_9014c_VAL 0xbc
+#define DDRPHY_9014d_VAL 0x790
+#define DDRPHY_9014e_VAL 0x16a
+#define DDRPHY_9014f_VAL 0xc
+#define DDRPHY_90150_VAL 0x408
+#define DDRPHY_90151_VAL 0x169
+#define DDRPHY_90152_VAL 0x12
+#define DDRPHY_90153_VAL 0x0
+#define DDRPHY_90154_VAL 0x68
+#define DDRPHY_90155_VAL 0x2
+#define DDRPHY_90156_VAL 0x408
+#define DDRPHY_90157_VAL 0x169
+#define DDRPHY_90158_VAL 0x0
+#define DDRPHY_90159_VAL 0x8558
+#define DDRPHY_9015a_VAL 0x168
+#define DDRPHY_9015b_VAL 0x8
+#define DDRPHY_9015c_VAL 0x3c8
+#define DDRPHY_9015d_VAL 0x1a9
+#define DDRPHY_9015e_VAL 0x3
+#define DDRPHY_9015f_VAL 0x370
+#define DDRPHY_90160_VAL 0x129
+#define DDRPHY_90161_VAL 0x0
+#define DDRPHY_90162_VAL 0x2a8
+#define DDRPHY_90163_VAL 0x129
+#define DDRPHY_90164_VAL 0x0
+#define DDRPHY_90165_VAL 0x400
+#define DDRPHY_90166_VAL 0x10e
+#define DDRPHY_90167_VAL 0x8
+#define DDRPHY_90168_VAL 0xe8
+#define DDRPHY_90169_VAL 0x109
+#define DDRPHY_9016a_VAL 0x0
+#define DDRPHY_9016b_VAL 0x8140
+#define DDRPHY_9016c_VAL 0x10c
+#define DDRPHY_9016d_VAL 0x10
+#define DDRPHY_9016e_VAL 0x8138
+#define DDRPHY_9016f_VAL 0x10c
+#define DDRPHY_90170_VAL 0x8
+#define DDRPHY_90171_VAL 0x7c8
+#define DDRPHY_90172_VAL 0x101
+#define DDRPHY_90173_VAL 0x8
+#define DDRPHY_90174_VAL 0x0
+#define DDRPHY_90175_VAL 0x8
+#define DDRPHY_90176_VAL 0x8
+#define DDRPHY_90177_VAL 0x448
+#define DDRPHY_90178_VAL 0x109
+#define DDRPHY_90179_VAL 0xf
+#define DDRPHY_9017a_VAL 0x7c0
+#define DDRPHY_9017b_VAL 0x109
+#define DDRPHY_9017c_VAL 0x0
+#define DDRPHY_9017d_VAL 0xe8
+#define DDRPHY_9017e_VAL 0x109
+#define DDRPHY_9017f_VAL 0x47
+#define DDRPHY_90180_VAL 0x630
+#define DDRPHY_90181_VAL 0x109
+#define DDRPHY_90182_VAL 0x8
+#define DDRPHY_90183_VAL 0x618
+#define DDRPHY_90184_VAL 0x109
+#define DDRPHY_90185_VAL 0x8
+#define DDRPHY_90186_VAL 0xe0
+#define DDRPHY_90187_VAL 0x109
+#define DDRPHY_90188_VAL 0x0
+#define DDRPHY_90189_VAL 0x7c8
+#define DDRPHY_9018a_VAL 0x109
+#define DDRPHY_9018b_VAL 0x8
+#define DDRPHY_9018c_VAL 0x8140
+#define DDRPHY_9018d_VAL 0x10c
+#define DDRPHY_9018e_VAL 0x0
+#define DDRPHY_9018f_VAL 0x1
+#define DDRPHY_90190_VAL 0x8
+#define DDRPHY_90191_VAL 0x8
+#define DDRPHY_90192_VAL 0x7c8
+#define DDRPHY_90193_VAL 0x101
+#define DDRPHY_90006_VAL 0x0
+#define DDRPHY_90007_VAL 0x0
+#define DDRPHY_90008_VAL 0x8
+#define DDRPHY_90009_VAL 0x0
+#define DDRPHY_9000a_VAL 0x0
+#define DDRPHY_9000b_VAL 0x0
+#define DDRPHY_d00e7_VAL 0x400
+#define DDRPHY_90017_VAL 0x0
+#define DDRPHY_90026_VAL 0x6e
+#define DDRPHY_400d0_VAL 0x0
+#define DDRPHY_400d1_VAL 0x101
+#define DDRPHY_400d2_VAL 0x105
+#define DDRPHY_400d3_VAL 0x107
+#define DDRPHY_400d4_VAL 0x10f
+#define DDRPHY_400d5_VAL 0x202
+#define DDRPHY_400d6_VAL 0x20a
+#define DDRPHY_400d7_VAL 0x20b
+#define DDRPHY_9000c_VAL 0x0
+#define DDRPHY_9000d_VAL 0x73
+#define DDRPHY_9000e_VAL 0x60
+#define DDRPHY_9000f_VAL 0x6010
+#define DDRPHY_90010_VAL 0x2052
+#define DDRPHY_90011_VAL 0xdfbd
+#define DDRPHY_90012_VAL 0x60
+#define DDRPHY_90013_VAL 0x6052
+#define DDRPHY_2003a_VAL 0x2
+#define DDRPHY_20010_VAL 0x0
+#define DDRPHY_120010_VAL 0x0
+#define DDRPHY_220010_VAL 0x0
+#define DDRPHY_320010_VAL 0x0
+#define DDRPHY_400fd_VAL 0xf
+#define DDRPHY_10011_VAL 0x1
+#define DDRPHY_10012_VAL 0x1
+#define DDRPHY_10013_VAL 0x180
+#define DDRPHY_10018_VAL 0x1
+#define DDRPHY_10002_VAL 0x6209
+#define DDRPHY_100b2_VAL 0x1
+#define DDRPHY_101b4_VAL 0x1
+#define DDRPHY_102b4_VAL 0x1
+#define DDRPHY_103b4_VAL 0x1
+#define DDRPHY_104b4_VAL 0x1
+#define DDRPHY_105b4_VAL 0x1
+#define DDRPHY_106b4_VAL 0x1
+#define DDRPHY_107b4_VAL 0x1
+#define DDRPHY_108b4_VAL 0x1
+#define DDRPHY_11011_VAL 0x1
+#define DDRPHY_11012_VAL 0x1
+#define DDRPHY_11013_VAL 0x180
+#define DDRPHY_11018_VAL 0x1
+#define DDRPHY_11002_VAL 0x6209
+#define DDRPHY_110b2_VAL 0x1
+#define DDRPHY_111b4_VAL 0x1
+#define DDRPHY_112b4_VAL 0x1
+#define DDRPHY_113b4_VAL 0x1
+#define DDRPHY_114b4_VAL 0x1
+#define DDRPHY_115b4_VAL 0x1
+#define DDRPHY_116b4_VAL 0x1
+#define DDRPHY_117b4_VAL 0x1
+#define DDRPHY_118b4_VAL 0x1
+#define DDRPHY_2003a_VAL 0x2
+// Disabling Ucclk (PMU)
+#define DDRPHY_c0080_VAL 0x2
+// Isolate the APB access from the internal CSRs by setting the MicroContMuxSel CSR to 1. 
+#define DDRPHY_d0000_VAL 0x1
+//##############################################################
+//
+// 4.3.10(J) Initialize the PHY to Mission Mode through DFI Initialization 
+//
+// Initialize the PHY to mission mode as follows: 
+//
+// 1. Set the PHY input clocks to the desired frequency. 
+// 2. Initialize the PHY to mission mode by performing DFI Initialization. 
+//    Please see the DFI specification for more information. See the DFI frequency bus encoding in section <XXX>.
+//
+//##############################################################
