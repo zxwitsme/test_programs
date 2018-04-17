@@ -10,7 +10,7 @@
 
 #define MAX_LINE_LEN 2048
 
-int reg_hit[3278000] = {0};
+int reg_hit[32780000] = {0};
 
 unsigned short mapping[][2]=
 {
@@ -146,9 +146,12 @@ int main(int argc, char* argv[])
 					axi_reg = reg_convert(reg);
 					if (reg_hit[reg] == 0) {
 						fprintf(fp_h, "#define DDRPHY_%x_%x 0x%x\n", reg, axi_reg, axi_reg);
-						reg_hit[reg] = 1;
 					}
-					fprintf(fp_out, "#define DDRPHY_%x_%x_VAL 0x%x\n", reg, axi_reg, val);
+					if (reg == 0x50000)
+						fprintf(fp_out, "//#define DDRPHY_%x_%x_VA%02d 0x%x\n", reg, axi_reg, reg_hit[reg], val);
+					else
+						fprintf(fp_out, "#define DDRPHY_%x_%x_VA%02d 0x%x\n", reg, axi_reg, reg_hit[reg], val);
+					reg_hit[reg]++;
 				}
 			} else if (buf_out = strstr(buf, KEY_WORD5))
 				fprintf(fp_out, "%s", buf_out);
